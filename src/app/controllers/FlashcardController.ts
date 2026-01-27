@@ -1,12 +1,23 @@
-import { Request, Response } from 'express';
+import {  Request,Response } from 'express';
+import FlashcardRepository from '../repository/FlashcardRepository';
 
 class FlashcardController{
-  index(request: Request, response: Response){
-    response.send('Send from Flashcard Controller')
+
+  async index(request: Request, response: Response){
+    const flashcard =  await FlashcardRepository.findAll();
+    response.json(flashcard);
+
   }
 
-  show(){
+  async show(request: Request, response: Response): Promise<Response> {
 
+    const { id } = request.params;
+
+    const flashcard = await FlashcardRepository.findById(id);
+
+    if (!flashcard) return response.status(404).json({ error: 'Flashcard not found!' });
+
+    return response.json(flashcard);
   }
 
   store(){
@@ -15,7 +26,19 @@ class FlashcardController{
 
   update(){}
 
-  delete(){}
+  async delete(request: Request, response: Response) {
+    const { id } = request.params;
+
+    const flashcard = await FlashcardRepository.findById(id);
+
+    if(!flashcard) return response.status(404).json({ error: 'Flashcard not found!' });
+
+    await FlashcardRepository.delete(id);
+
+    response.sendStatus(204);
+
+
+  }
 
 }
 
