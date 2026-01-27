@@ -1,0 +1,44 @@
+{
+  "name": "api-flash-card",
+  "version": "1.0.0",
+  "description": "api",
+  "homepage": "https://github.com/tisiqueiradev/flash-card#readme",
+  "bugs": {
+    "url": "https://github.com/tisiqueiradev/flash-card/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tisiqueiradev/flash-card.git"
+  },
+  "license": "ISC",
+  "author": "Tiago Siqueira Dev",
+  "type": "module",
+  "main": "app.ts",
+  "scripts": {
+    "test": "jest",
+    "dev": "tsx src/app/app.ts",
+    "build": "tsc",
+    "start": "node dist/app/app.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.0.10",
+    "@types/supertest": "^6.0.3",
+    "eslint": "^9.39.2",
+    "globals": "^17.1.0",
+    "jest": "^30.2.0",
+    "jiti": "^2.6.1",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0",
+    "vitest": "^4.0.18"
+  }
+}
