@@ -4,3 +4,4 @@ export interface Flashcard {
   answer: string;
   deck_id: string;
 }
+

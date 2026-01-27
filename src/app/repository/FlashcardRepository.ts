@@ -2,6 +2,12 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Flashcard } from '../models/Flashcard';
 
+interface CreateFlashcardDTO {
+  question: string;
+  answer: string;
+  deck_id: string;
+}
+
 
 let flashcards: Flashcard[] = [
   {
@@ -40,6 +46,41 @@ class FlashcardRepository{
       resolve();
     })
 
+  }
+
+
+  async create({
+    question, answer, deck_id
+  }: CreateFlashcardDTO): Promise<Flashcard> {
+
+      const newFlashcard: Flashcard = {
+        id: uuidv4(),
+        question,
+        answer,
+        deck_id,
+
+      };
+      flashcards.push(newFlashcard);
+      return newFlashcard
+
+
+  }
+
+  async update(id: string, {
+    question, answer, deck_id
+  }: CreateFlashcardDTO): Promise<Flashcard> {
+    const updateFlashcard: Flashcard = {
+        id,
+        question,
+        answer,
+        deck_id,
+    }
+
+    flashcards = flashcards.map((flashcard) => (
+      flashcard.id === id ? updateFlashcard : flashcard
+    ))
+
+    return updateFlashcard
   }
 }
 
