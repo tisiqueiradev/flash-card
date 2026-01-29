@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Deck {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id")
+  title       String
+  description String?
+  isPublic    Boolean  @default(true) @map("is_public")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  flashcards Flashcard[]
+
+  @@index([userId])
+  @@index([isPublic])
+  @@map("decks")
+}
+
+model Flashcard {
+  id        String   @id @default(uuid()) @db.Uuid
+  deckId    String   @map("deck_id") @db.Uuid
+  question  String
+  answer    String
+  order     Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  deck Deck @relation(fields: [deckId], references: [id], onDelete: Cascade)
+
+  @@index([deckId])
+  @@index([deckId, order])
+  @@map("flashcards")
+}

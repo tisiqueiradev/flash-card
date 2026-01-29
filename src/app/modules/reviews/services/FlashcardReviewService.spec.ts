@@ -17,7 +17,7 @@ describe('FlashcardReviewService', () => {
     );
   });
 
-  it('should create a new review if none exists', async () => {
+  it('should create a new review and apply SM-2 on first successful review', async () => {
     const review = await reviewService.execute({
       userId: 'user-1',
       flashcardId: 'flashcard-1',
@@ -25,9 +25,12 @@ describe('FlashcardReviewService', () => {
     });
 
     expect(review).toHaveProperty('id');
-    expect(review.repetitions).toBe(0);
+
+    // SM-2 aplicado
+    expect(review.repetitions).toBe(1);
     expect(review.interval).toBe(1);
-    expect(review.easeFactor).toBe(2.5);
+    expect(review.easeFactor).toBe(2.36);
+    expect(review.nextReview).toBeInstanceOf(Date);
   });
 
   it('should create a history entry on every review', async () => {
