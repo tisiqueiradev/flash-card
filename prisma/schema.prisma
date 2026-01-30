@@ -8,19 +8,14 @@ datasource db {
 }
 
 model Deck {
-  id          String   @id @default(uuid()) @db.Uuid
-  userId      String   @map("user_id")
-  title       String
-  description String?
-  isPublic    Boolean  @default(true) @map("is_public")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  flashcards Flashcard[]
-
-  @@index([userId])
-  @@index([isPublic])
-  @@map("decks")
+  id          String      @id @default(uuid()) @db.Uuid
+  userId      String      @map("user_id")
+  title       String      @map("name") // API usa "name"
+  description String      @map("theme") // API usa "theme"
+  isPublic    Boolean     @default(true) @map("is_public")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  flashcards  Flashcard[]
 }
 
 model Flashcard {

@@ -1,79 +1,108 @@
 import { Request, Response } from 'express';
-import { InMemoryDeckRepository } from '../respositores/InMemoryDeckRepository';
-
-
-const deckRepository = new InMemoryDeckRepository();
-
-type IdParams = {
-  id: string;
-};
+import { prisma } from '../../../../shared/database/prisma';
 
 class DeckController {
-
+  // Listar todos os decks
   async index(req: Request, res: Response) {
-    const decks = await deckRepository.findAll();
-    return res.json(decks);
+    const decks = await prisma.deck.findMany();
+
+    // Mapeia Prisma → API
+    const mapped = decks.map((d) => ({
+      id: d.id,
+      name: d.title,
+      theme: d.description,
+      isPublic: d.isPublic,
+      userId: d.userId,
+      createdAt: d.createdAt,
+      updatedAt: d.updatedAt,
+    }));
+
+    return res.json(mapped);
   }
 
-  async show(req: Request<IdParams>, res: Response) {
+  // Buscar deck pelo id
+  async show(req: Request<{ id: string }>, res: Response) {
     const { id } = req.params;
+    const deck = await prisma.deck.findUnique({ where: { id } });
 
-    const deck = await deckRepository.findById(id);
+    if (!deck) return res.status(404).json({ error: 'deck not found' });
 
-    if (!deck) {
-      return res.status(404).json({ error: 'Deck not found' });
-    }
-
-    return res.json(deck);
+    return res.json({
+      id: deck.id,
+      name: deck.title,
+      theme: deck.description,
+      isPublic: deck.isPublic,
+      userId: deck.userId,
+      createdAt: deck.createdAt,
+      updatedAt: deck.updatedAt,
+    });
   }
 
+  // Criar novo deck
   async store(req: Request, res: Response) {
-    const { name,theme, isPublic, createdAt,updatedAt } = req.body;
+    const { name, theme, isPublic, userId } = req.body;
 
-    if (!theme || !name ) {
+    if (!name || !theme || !userId) {
       return res.status(400).json({ error: 'Invalid data' });
     }
 
-    const deck = await deckRepository.create({
-      name,
-      theme,
-      isPublic,
-      createdAt,
-      updatedAt,
+    const deck = await prisma.deck.create({
+      data: {
+        title: name,
+        description: theme,
+        isPublic: isPublic ?? true,
+        userId,
+      },
     });
 
-    return res.status(201).json(deck);
-  }
-
-  async update(req: Request<IdParams>, res: Response) {
-    const { id } = req.params;
-    const { name, theme, updatedAt, createdAt } = req.body;
-
-    const deck = await deckRepository.update(id, {
-      name,
-      theme,
-      updatedAt,
-      isPublic: 'public',
-      createdAt
+    return res.status(201).json({
+      id: deck.id,
+      name: deck.title,
+      theme: deck.description,
+      isPublic: deck.isPublic,
+      userId: deck.userId,
+      createdAt: deck.createdAt,
+      updatedAt: deck.updatedAt,
     });
-
-    if (!deck) {
-      return res.status(404).json({ error: 'deck not found' });
-    }
-
-    return res.json(deck);
   }
 
-  async delete(req: Request<IdParams>, res: Response) {
+  // Atualizar deck
+  async update(req: Request<{ id: string }>, res: Response) {
+    const { id } = req.params;
+    const { name, theme, isPublic } = req.body;
+
+    const deck = await prisma.deck
+      .update({
+        where: { id },
+        data: {
+          title: name,
+          description: theme,
+          isPublic,
+        },
+      })
+      .catch(() => null);
+
+    if (!deck) return res.status(404).json({ error: 'deck not found' });
+
+    return res.json({
+      id: deck.id,
+      name: deck.title,
+      theme: deck.description,
+      isPublic: deck.isPublic,
+      userId: deck.userId,
+      createdAt: deck.createdAt,
+      updatedAt: deck.updatedAt,
+    });
+  }
+
+  // Deletar deck
+  async delete(req: Request<{ id: string }>, res: Response) {
     const { id } = req.params;
 
-    const deck = await deckRepository.findById(id);
+    const deck = await prisma.deck.findUnique({ where: { id } });
+    if (!deck) return res.status(404).json({ error: 'deck not found' });
 
-    if (!deck) {
-      return res.status(404).json({ error: 'deck not found' });
-    }
-
-    await deckRepository.delete(id);
+    await prisma.deck.delete({ where: { id } });
     return res.sendStatus(204);
   }
 }
