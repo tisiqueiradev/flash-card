@@ -3,5 +3,8 @@ export interface Flashcard {
   question: string;
   answer: string;
   deck_id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  order?: number;
 }
 

@@ -1,5 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from 'express';
-import { prisma } from '../../../../shared/database/prisma';
+import { FlashcardService } from '../services/FlashcardService';
+import { PrismaFlashcardRepository } from '../repositories/PrismaFlashcarRepository';
+import { PrismaDeckRepository } from '../../decks/respositories/PrismaDeckRepository';
+
+
+const flashcardRepository  = new PrismaFlashcardRepository();
+const deckRepository = new PrismaDeckRepository();
+
+const flashcardService = new FlashcardService(flashcardRepository, deckRepository);
 
 type IdParams = {
   id: string;
@@ -7,7 +16,7 @@ type IdParams = {
 
 class FlashcardController {
   async index(req: Request, res: Response) {
-    const flashcards = await prisma.flashcard.findMany();
+    const flashcards = await flashcardService.findAll();
     return res.json(flashcards);
   }
 
@@ -15,9 +24,7 @@ class FlashcardController {
     const { id } = req.params;
 
     try {
-      const flashcard = await prisma.flashcard.findUnique({
-        where: { id },
-      });
+      const flashcard = await flashcardService.findById(id)
 
       if (!flashcard) {
         return res.status(404).json({ error: 'Flashcard not found' });
@@ -30,69 +37,45 @@ class FlashcardController {
   }
 
   async store(req: Request, res: Response) {
-    const { question, answer, deck_id } = req.body;
+  const data = req.body;
 
-    if (!question || !answer || !deck_id) {
-      return res.status(400).json({ error: 'Invalid data' });
-    }
-
-    // ✅ CHECAGEM EXPLÍCITA (isso evita o 500)
-    const deckExists = await prisma.deck.findUnique({
-      where: { id: deck_id },
-    });
-
-    if (!deckExists) {
-      return res.status(404).json({ error: 'Deck not found' });
-    }
-
-    const flashcard = await prisma.flashcard.create({
-      data: {
-        question,
-        answer,
-        deck_id,
-      },
-    });
-
-    return res.status(201).json(flashcard);
+  if (!data.question || !data.answer || !data.deck_id) {
+    return res.status(400).json({ error: 'Invalid data' });
   }
+
+  try {
+    const flashcard = await flashcardService.create(data);
+    return res.status(201).json(flashcard);
+  } catch (err: any) {
+    return res.status(400).json({ error: err.message });
+  }
+}
+
 
   async update(req: Request<IdParams>, res: Response) {
     const { id } = req.params;
-    const { question, answer } = req.body;
+    const data = req.body;
 
-    const existing = await prisma.flashcard.findUnique({
-      where: { id },
-    });
+    const existing = await flashcardService.findById(id)
 
     if (!existing) {
       return res.status(404).json({ error: 'Flashcard not found' });
     }
 
-    const flashcard = await prisma.flashcard.update({
-      where: { id },
-      data: {
-        question,
-        answer,
-      },
-    });
-
+    const flashcard = await flashcardService.update(id, data)
     return res.json(flashcard);
   }
 
   async delete(req: Request<IdParams>, res: Response) {
     const { id } = req.params;
 
-    const existing = await prisma.flashcard.findUnique({
-      where: { id },
-    });
+    const existing = await flashcardService.findById(id);
 
     if (!existing) {
       return res.status(404).json({ error: 'Flashcard not found' });
     }
 
-    await prisma.flashcard.delete({
-      where: { id },
-    });
+    await flashcardService.delete(id)
 
     return res.sendStatus(204);
   }

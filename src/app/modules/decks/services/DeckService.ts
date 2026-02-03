@@ -1,7 +1,7 @@
 import { Deck } from '../entities/deck';
 import {
   DeckRepository,
-} from '../respositores/DeckRepository';
+} from '../respositories/DeckRepository';
 import { CreateDeckDTO } from '../services/CreateDeckDTO';
 import { UpdateDeckDTO} from '../services/UpdateDeckDTO';
 

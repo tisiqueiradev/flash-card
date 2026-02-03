@@ -1,10 +1,6 @@
 import { Flashcard } from '../entities/Flashcard';
-
-export interface CreateFlashcardDTO {
-  question: string;
-  answer: string;
-  deck_id: string;
-}
+import { CreateFlashcardDTO } from '../services/CreateFlashcardDTO';
+import { UpdateFlashcardDTO } from '../services/UpdateFlashcardDTO';
 
 export interface FlashcardRepository {
   findAll(): Promise<Flashcard[]>;
@@ -12,7 +8,7 @@ export interface FlashcardRepository {
   create(data: CreateFlashcardDTO): Promise<Flashcard>;
   update(
     id: string,
-    data: CreateFlashcardDTO
+    data: UpdateFlashcardDTO
   ): Promise<Flashcard | null>;
-  delete(id: string): Promise<void>;
+  delete(id: string): Promise<boolean>;
 }

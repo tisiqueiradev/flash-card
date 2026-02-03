@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from 'express';
 import { DeckService } from '../services/DeckService';
-import { PrismaDeckRepository } from '../respositores/PrismaDeckRepository';
+import { PrismaDeckRepository } from '../respositories/PrismaDeckRepository';
 
 const deckRepository = new PrismaDeckRepository();
 const deckService = new DeckService(deckRepository);
