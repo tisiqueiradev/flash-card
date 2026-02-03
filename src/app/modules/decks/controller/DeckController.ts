@@ -1,116 +1,63 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from 'express';
-import { prisma } from '../../../../shared/database/prisma';
+import { DeckService } from '../services/DeckService';
+import { PrismaDeckRepository } from '../respositores/PrismaDeckRepository';
+
+const deckRepository = new PrismaDeckRepository();
+const deckService = new DeckService(deckRepository);
 
 class DeckController {
-  // Listar todos os decks
   async index(req: Request, res: Response) {
-    const decks = await prisma.deck.findMany();
-
-    // Mapeia Prisma → API
-    const mapped = decks.map((d) => ({
-      id: d.id,
-      name: d.title,
-      theme: d.description,
-      isPublic: d.isPublic,
-      userId: d.userId,
-      createdAt: d.createdAt,
-      updatedAt: d.updatedAt,
-    }));
-
-    return res.json(mapped);
+    const decks = await deckService.findAll();
+    return res.json(decks);
   }
 
-  // Buscar deck pelo id
   async show(req: Request<{ id: string }>, res: Response) {
-  const { id } = req.params;
-
-  try {
-    const deck = await prisma.deck.findUnique({ where: { id } });
-
-    if (!deck) return res.status(404).json({ error: 'deck not found' });
-
-    return res.json({
-      id: deck.id,
-      name: deck.title,
-      theme: deck.description,
-      isPublic: deck.isPublic,
-      userId: deck.userId,
-      createdAt: deck.createdAt,
-      updatedAt: deck.updatedAt,
-    });
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (err) {
-    // erro de UUID inválido
-    return res.status(400).json({ error: 'Invalid deck ID' });
-  }
-}
-
-  // Criar novo deck
-  async store(req: Request, res: Response) {
-    const { name, theme, isPublic, userId } = req.body;
-
-    if (!name || !theme || !userId) {
-      return res.status(400).json({ error: 'Invalid data' });
+    try {
+      const deck = await deckService.findById(req.params.id);
+      return res.json(deck);
+    } catch (err: any) {
+      return res.status(404).json({ error: err.message });
     }
-
-    const deck = await prisma.deck.create({
-      data: {
-        title: name,
-        description: theme,
-        isPublic: isPublic ?? true,
-        userId,
-      },
-    });
-
-    return res.status(201).json({
-      id: deck.id,
-      name: deck.title,
-      theme: deck.description,
-      isPublic: deck.isPublic,
-      userId: deck.userId,
-      createdAt: deck.createdAt,
-      updatedAt: deck.updatedAt,
-    });
   }
 
-  // Atualizar deck
+  async store(req: Request, res: Response) {
+    try {
+      const deck = await deckService.create({
+        name: req.body.name,
+        theme: req.body.theme,
+        isPublic: req.body.isPublic ?? true,
+        userId: req.body.userId,
+      });
+
+      return res.status(201).json(deck);
+    } catch (err: any) {
+      return res.status(400).json({ error: err.message });
+    }
+  }
+
   async update(req: Request<{ id: string }>, res: Response) {
-    const { id } = req.params;
-    const { name, theme, isPublic } = req.body;
+    try {
+      const deck = await deckService.update(req.params.id, {
+        name: req.body.name,
+        theme: req.body.theme,
+        isPublic: req.body.isPublic,
+      });
 
-    const deck = await prisma.deck
-      .update({
-        where: { id },
-        data: {
-          title: name,
-          description: theme,
-          isPublic,
-        },
-      })
-      .catch(() => null);
-
-    if (!deck) return res.status(404).json({ error: 'deck not found' });
-
-    return res.json({
-      id: deck.id,
-      name: deck.title,
-      theme: deck.description,
-      isPublic: deck.isPublic,
-      userId: deck.userId,
-      createdAt: deck.createdAt,
-      updatedAt: deck.updatedAt,
-    });
+      return res.json(deck);
+    } catch (err: any) {
+      return res.status(404).json({ error: err.message });
+    }
   }
 
-  // Deletar deck
   async delete(req: Request<{ id: string }>, res: Response) {
-    const { id } = req.params;
+    try {
+      await deckService.delete(req.params.id);
+      return res.sendStatus(204);
 
-    const deck = await prisma.deck.findUnique({ where: { id } });
-    if (!deck) return res.status(404).json({ error: 'deck not found' });
-
-    await prisma.deck.delete({ where: { id } });
-    return res.sendStatus(204);
+    } catch (err: any) {
+      return res.status(404).json({ error: err.message });
+    }
   }
 }
 

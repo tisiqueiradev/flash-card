@@ -1,8 +1,9 @@
 import { Deck } from '../entities/deck';
 import {
   DeckRepository,
-  CreateDeckDTO,
 } from '../respositores/DeckRepository';
+import { CreateDeckDTO } from '../services/CreateDeckDTO';
+import { UpdateDeckDTO} from '../services/UpdateDeckDTO';
 
 export class DeckService {
   constructor(
@@ -31,7 +32,7 @@ export class DeckService {
     return this.deckRepository.create(data);
   }
 
-  async update(id: string, data: CreateDeckDTO): Promise<Deck> {
+  async update(id: string, data: UpdateDeckDTO): Promise<Deck> {
     const existingDeck = await this.deckRepository.findById(id);
 
     if (!existingDeck) {
