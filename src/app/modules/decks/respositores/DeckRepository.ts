@@ -4,8 +4,7 @@ export interface CreateDeckDTO {
   name: string;
   theme: string;
   isPublic: string;
-  createdAt: Date;
-  updatedAt:Date;
+  userId:string;
 }
 
 export interface DeckRepository{

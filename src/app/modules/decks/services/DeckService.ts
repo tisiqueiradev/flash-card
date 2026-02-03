@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import { Deck } from '../entities/deck';
 import {
   DeckRepository,
@@ -7,66 +6,50 @@ import {
 
 export class DeckService {
   constructor(
-    private readonly DeckRepository: DeckRepository
+    private readonly deckRepository: DeckRepository
   ) {}
 
   async findAll(): Promise<Deck[]> {
-    return this.DeckRepository.findAll();
+    return this.deckRepository.findAll();
   }
 
   async findById(id: string): Promise<Deck> {
-    const flashcard = await this.DeckRepository.findById(id);
+    const deck = await this.deckRepository.findById(id);
 
-    if (!flashcard) {
-      throw new Error('Flashcard not found');
+    if (!deck) {
+      throw new Error('Deck not found');
     }
 
-    return flashcard;
+    return deck;
   }
 
   async create(data: CreateDeckDTO): Promise<Deck> {
     if (!data.name || !data.theme) {
-      throw new Error('Question and answer are required');
+      throw new Error('Name and theme are required');
     }
 
-    const deck: Deck = {
-      id: uuidv4(),
-      name: data.name,
-      updatedAt: data.updatedAt,
-      createdAt: data.createdAt,
-      isPublic: 'public',
-      theme: ''
-    };
-
-    return this.DeckRepository.create(deck);
+    return this.deckRepository.create(data);
   }
 
-  async update(
-    id: string,
-    data: CreateDeckDTO
-  ): Promise<Deck> {
-    const existingFlashcard =
-      await this.DeckRepository.findById(id);
+  async update(id: string, data: CreateDeckDTO): Promise<Deck> {
+    const existingDeck = await this.deckRepository.findById(id);
 
-    if (!existingFlashcard) {
-      throw new Error('Flashcard not found');
+    if (!existingDeck) {
+      throw new Error('Deck not found');
     }
 
-    const updatedFlashcard = await this.DeckRepository.update(
-      id,
-      data
-    );
+    const updatedDeck = await this.deckRepository.update(id, data);
 
-    return updatedFlashcard!;
+    return updatedDeck!;
   }
 
   async delete(id: string): Promise<void> {
-    const flashcard = await this.DeckRepository.findById(id);
+    const deck = await this.deckRepository.findById(id);
 
-    if (!flashcard) {
-      throw new Error('Flashcard not found');
+    if (!deck) {
+      throw new Error('Deck not found');
     }
 
-    await this.DeckRepository.delete(id);
+    await this.deckRepository.delete(id);
   }
 }

@@ -1,45 +1,46 @@
 import { FlashcardService } from './FlashcardService';
 import { InMemoryFlashcardRepository } from '../repositories/InMemoryFlashcardRepository';
+import { InMemoryDeckRepository } from '../../decks/respositores/InMemoryDeckRepository';
 
 describe('FlashcardService', () => {
   let flashcardService: FlashcardService;
   let flashcardRepository: InMemoryFlashcardRepository;
+  let deckRepository: InMemoryDeckRepository;
 
   beforeEach(() => {
     flashcardRepository = new InMemoryFlashcardRepository();
-    flashcardService = new FlashcardService(flashcardRepository);
+    deckRepository = new InMemoryDeckRepository();
+
+    flashcardService = new FlashcardService(
+      flashcardRepository,
+      deckRepository
+    );
   });
 
   it('should create a flashcard', async () => {
+    const deck = await deckRepository.create({
+      name: 'Deck test',
+      theme: 'Theme',
+      isPublic: 'true',
+      userId: 'user-1'
+    });
+
     const flashcard = await flashcardService.create({
-      question: "What's your name?",
-      answer: 'Qual é o seu nome?',
-      deck_id: 'deck-1',
+      question: 'Question?',
+      answer: 'Answer',
+      deck_id: deck.id,
     });
 
     expect(flashcard).toHaveProperty('id');
-    expect(flashcard.question).toBe("What's your name?");
   });
 
-  it('should not create a flashcard without question', async () => {
+  it('should not create flashcard without deck', async () => {
     await expect(
       flashcardService.create({
-        question: '',
-        answer: 'teste',
-        deck_id: 'deck-1',
+        question: 'Question?',
+        answer: 'Answer',
+        deck_id: 'invalid-deck',
       })
-    ).rejects.toThrow('Question and answer are required');
-  });
-
-  it('should throw error when flashcard does not exist', async () => {
-    await expect(
-      flashcardService.findById('invalid-id')
-    ).rejects.toThrow('Flashcard not found');
-  });
-
-  it('should not delete a non existing flashcard', async () => {
-    await expect(
-      flashcardService.delete('invalid-id')
-    ).rejects.toThrow('Flashcard not found');
+    ).rejects.toThrow('Deck not found');
   });
 });

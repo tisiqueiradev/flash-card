@@ -4,10 +4,12 @@ import {
   FlashcardRepository,
   CreateFlashcardDTO,
 } from '../repositories/FlashcardRepository';
+import { DeckRepository } from '../../decks/respositores/DeckRepository';
 
 export class FlashcardService {
   constructor(
-    private readonly flashcardRepository: FlashcardRepository
+    private readonly flashcardRepository: FlashcardRepository,
+    private readonly deckRepository: DeckRepository
   ) {}
 
   async findAll(): Promise<Flashcard[]> {
@@ -25,8 +27,15 @@ export class FlashcardService {
   }
 
   async create(data: CreateFlashcardDTO): Promise<Flashcard> {
-    if (!data.question || !data.answer) {
-      throw new Error('Question and answer are required');
+    if (!data.question || !data.answer || !data.deck_id) {
+      throw new Error('Invalid data');
+    }
+
+    // 🔐 REGRA DE NEGÓCIO: flashcard não existe sem deck
+    const deckExists = await this.deckRepository.findById(data.deck_id);
+
+    if (!deckExists) {
+      throw new Error('Deck not found');
     }
 
     const flashcard: Flashcard = {
@@ -48,6 +57,14 @@ export class FlashcardService {
 
     if (!existingFlashcard) {
       throw new Error('Flashcard not found');
+    }
+
+    if (data.deck_id) {
+      const deckExists = await this.deckRepository.findById(data.deck_id);
+
+      if (!deckExists) {
+        throw new Error('Deck not found');
+      }
     }
 
     const updatedFlashcard = await this.flashcardRepository.update(

@@ -27,8 +27,8 @@ export class InMemoryDeckRepository implements DeckRepository{
       name: data.name,
       theme: data.theme,
       isPublic: data.isPublic,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
 
     this.decks.push(newDeck);
@@ -37,21 +37,23 @@ export class InMemoryDeckRepository implements DeckRepository{
 
   async update(id: string, data: CreateDeckDTO): Promise<Deck | null> {
   const index = this.decks.findIndex(deck => deck.id === id);
+  if (index === -1) return null;
 
-  if (index === -1) return null; // ⬅ agora retorna null se não existir
+  const deck = this.decks[index];
 
   const updatedDeck: Deck = {
     id,
     name: data.name,
     theme: data.theme,
     isPublic: data.isPublic,
-    createdAt: data.createdAt,
-    updatedAt: data.updatedAt
+    createdAt: deck.createdAt,
+    updatedAt: new Date(),
   };
 
   this.decks[index] = updatedDeck;
   return updatedDeck;
 }
+
   async delete(id:string): Promise<void> {
     this.decks = this.decks.filter(
       (deck) => deck.id !== id
@@ -59,4 +61,5 @@ export class InMemoryDeckRepository implements DeckRepository{
   }
 
 }
+
 

@@ -22,7 +22,9 @@ class DeckController {
 
   // Buscar deck pelo id
   async show(req: Request<{ id: string }>, res: Response) {
-    const { id } = req.params;
+  const { id } = req.params;
+
+  try {
     const deck = await prisma.deck.findUnique({ where: { id } });
 
     if (!deck) return res.status(404).json({ error: 'deck not found' });
@@ -36,7 +38,12 @@ class DeckController {
       createdAt: deck.createdAt,
       updatedAt: deck.updatedAt,
     });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (err) {
+    // erro de UUID inválido
+    return res.status(400).json({ error: 'Invalid deck ID' });
   }
+}
 
   // Criar novo deck
   async store(req: Request, res: Response) {

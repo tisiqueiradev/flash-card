@@ -10,6 +10,11 @@ export class InMemoryFlashcardRepository
 {
   private flashcards: Flashcard[] = [];
 
+  clear() {
+    this.flashcards = [];
+  }
+
+
   async findAll(): Promise<Flashcard[]> {
     return this.flashcards;
   }
