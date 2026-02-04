@@ -7,15 +7,20 @@ const deckRepository = new PrismaDeckRepository();
 const deckService = new DeckService(deckRepository);
 
 class DeckController {
+
+
   async index(req: Request, res: Response) {
     const decks = await deckService.findAll();
-    return res.json(decks);
+    return res.status(200).json(decks);
   }
 
-  async show(req: Request<{ id: string }>, res: Response) {
+ async show(req: Request, res: Response)
+ {
+
+  const { id } = req.params  as { id: string };
     try {
-      const deck = await deckService.findById(req.params.id);
-      return res.json(deck);
+      const deck = await deckService.findById(id);
+      return res.status(200).json(deck);
     } catch (err: any) {
       return res.status(404).json({ error: err.message });
     }
@@ -36,23 +41,26 @@ class DeckController {
     }
   }
 
-  async update(req: Request<{ id: string }>, res: Response) {
+  async update(req: Request, res: Response) {
+
+    const { id } = req.params as { id: string}
     try {
-      const deck = await deckService.update(req.params.id, {
+      const deck = await deckService.update(id, {
         name: req.body.name,
         theme: req.body.theme,
         isPublic: req.body.isPublic,
       });
 
-      return res.json(deck);
+      return res.status(200).json(deck);
     } catch (err: any) {
       return res.status(404).json({ error: err.message });
     }
   }
 
-  async delete(req: Request<{ id: string }>, res: Response) {
+  async delete(req: Request, res: Response) {
+    const { id } = req.params as { id: string}
     try {
-      await deckService.delete(req.params.id);
+      await deckService.delete(id);
       return res.sendStatus(204);
 
     } catch (err: any) {
