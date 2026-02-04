@@ -9,13 +9,14 @@ datasource db {
 
 model Deck {
   id          String      @id @default(uuid()) @db.Uuid
-  userId      String      @map("user_id")
+  userId      String      @db.Uuid
   title       String      @map("name") // API usa "name"
   description String      @map("theme") // API usa "theme"
   isPublic    Boolean     @default(true) @map("is_public")
   createdAt   DateTime    @default(now()) @map("created_at")
   updatedAt   DateTime    @updatedAt @map("updated_at")
   flashcards  Flashcard[]
+  user        User        @relation(fields: [userId], references: [id])
 }
 
 model Flashcard {
@@ -27,9 +28,63 @@ model Flashcard {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  deck Deck @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  deck                     Deck                     @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  flashcardReviews         FlashcardReview[]
+  flashcardReviewHistories FlashcardReviewHistory[]
 
   @@index([deckId])
   @@index([deckId, order])
   @@map("flashcards")
+}
+
+model FlashcardReview {
+  id String @id @default(uuid()) @db.Uuid
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id])
+
+  flashcardId String    @map("flashcard_id") @db.Uuid
+  flashcard   Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+
+  repetitions Int
+  interval    Int
+  easeFactor  Float    @map("ease_factor")
+  nextReview  DateTime @map("next_review")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, flashcardId])
+}
+
+model FlashcardReviewHistory {
+  id String @id @default(uuid()) @db.Uuid
+
+  userId      String @map("user_id") @db.Uuid
+  flashcardId String @map("flashcard_id") @db.Uuid
+
+  quality Int
+
+  before Json
+  after  Json
+
+  reviewedAt DateTime @map("reviewed_at")
+
+  flashcard Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([flashcardId])
+  @@index([reviewedAt])
+  @@map("flashcard_review_histories")
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  decks            Deck[]
+  flashcardReviews FlashcardReview[]
 }

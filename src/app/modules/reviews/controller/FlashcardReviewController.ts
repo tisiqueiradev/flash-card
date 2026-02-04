@@ -7,13 +7,10 @@ export class FlashcardReviewController {
   ) {}
 
   async review(request: Request, response: Response): Promise<Response> {
-    const rawFlashcardId = request.params.flashcardId;
-    const { userId, quality } = request.body;
 
-    const flashcardId =
-      typeof rawFlashcardId === 'string'
-        ? rawFlashcardId
-        : rawFlashcardId?.[0];
+    const { userId, quality } = request.body;
+    const { flashcardId } = request.params as { flashcardId: string}
+
 
     const parsedQuality = Number(quality);
 

@@ -6,7 +6,8 @@ import { FlashcardReviewHistory } from '../entities/FlashcardReviewHistory';
 import { FlashcardReviewRepository } from '../repositories/FlashcardReviewRepository';
 import { FlashcardReviewHistoryRepository } from '../repositories/FlashcardReviewHistoryRepository';
 
-import { applySM2 } from '../../flashcards/domain/sm1';
+import { applySM2 } from '../../flashcards/domain/sm2';
+import { InvalidReviewQualityError } from '../../flashcards/domain/errors/InvalidReviewQualityError';
 
 export interface FlashcardReviewRequest {
   userId: string;
@@ -25,6 +26,10 @@ export class FlashcardReviewService {
     flashcardId,
     quality
   }: FlashcardReviewRequest): Promise<FlashcardReview> {
+
+      if (quality < 0 || quality > 5) {
+      throw new InvalidReviewQualityError();
+    }
 
     const now = new Date();
 
@@ -52,6 +57,11 @@ export class FlashcardReviewService {
 
       await this.reviewRepository.create(review);
     }
+    const before = {
+      repetitions: review.repetitions,
+      interval: review.interval,
+      easeFactor: review.easeFactor
+    };
 
     // 2️⃣ Aplicar SM-2
     const sm2Result = applySM2(
@@ -79,10 +89,15 @@ export class FlashcardReviewService {
       flashcardId,
 
       quality,
+      before,
 
-      repetitions: review.repetitions,
-      interval: review.interval,
-      easeFactor: review.easeFactor,
+      after:{
+
+        repetitions: review.repetitions,
+        interval: review.interval,
+        easeFactor: review.easeFactor,
+      },
+
 
       reviewedAt: now
     };

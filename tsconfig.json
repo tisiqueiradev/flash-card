@@ -7,8 +7,12 @@
     "outDir": "dist",
     "esModuleInterop": true,
     "strict": true,
-    "types": ["node", "jest"],
-    "skipLibCheck": true
+    "types": ["node"],
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": [
     "src",

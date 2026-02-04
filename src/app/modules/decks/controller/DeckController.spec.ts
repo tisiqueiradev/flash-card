@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response } from 'express';
 
-import DeckController from '../controller/DeckController';
+import DeckController from '@/app/modules/decks/controller/DeckController';
 import * as DeckServiceModule from '../services/DeckService';
 
 describe('DeckController', () => {
