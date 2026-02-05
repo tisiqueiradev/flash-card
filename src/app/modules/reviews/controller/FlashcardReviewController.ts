@@ -7,20 +7,17 @@ export class FlashcardReviewController {
   ) {}
 
   async review(request: Request, response: Response): Promise<Response> {
+    // 👇 vem do JWT (middleware ensureAuthenticated)
+    const userId = request.user.id;
 
-    const { userId, quality } = request.body;
-    const { flashcardId } = request.params as { flashcardId: string}
-
+    const { quality } = request.body;
+    const { flashcardId } = request.params as { flashcardId: string };
 
     const parsedQuality = Number(quality);
 
-    if (
-      !userId ||
-      !flashcardId ||
-      Number.isNaN(parsedQuality)
-    ) {
+    if (!flashcardId || Number.isNaN(parsedQuality)) {
       return response.status(400).json({
-        error: 'userId, flashcardId and quality are required'
+        error: 'flashcardId and quality are required'
       });
     }
 

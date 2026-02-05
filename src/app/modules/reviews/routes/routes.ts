@@ -5,6 +5,7 @@ import { FlashcardReviewService } from '../services/FlashcardReviewService';
 
 import { InMemoryFlashcardReviewRepository } from '../repositories/InMemoryFlashcardReviewRepository';
 import { InMemoryFlashcardReviewHistoryRepository } from '../repositories/InMemoryFlashcardReviewHistoryRepository';
+import { ensureAuthenticated } from '../../../../shared/middlewares/ensureAuthenticated';
 
 const router = Router();
 
@@ -21,10 +22,13 @@ const reviewService = new FlashcardReviewService(
 
 const reviewController = new FlashcardReviewController(reviewService);
 
-/**
- * Routes
- * POST /flashcards/:flashcardId/review
- */
+ router.post(
+  '/flashcards/:flashcardId/review',
+  ensureAuthenticated,
+  (request, response) => reviewController.review(request, response)
+);
+
+
 router.post('/:flashcardId/review', (request, response) =>
   reviewController.review(request, response)
 );

@@ -26,7 +26,7 @@ class UserController {
   }
 
   async showEmail(req: Request, res: Response) {
-    const { email } = req.body.email
+    const { email } = req.body
 
     try {
       const user = await userService.findByEmail(email);
@@ -74,7 +74,7 @@ class UserController {
 
     try{
       await userService.delete(id);
-      return res.status(200);
+      return res.sendStatus(204);
     }catch (err: any) {
       return res.status(404).json({ error: err.message});
     }
